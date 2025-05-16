@@ -1,3 +1,5 @@
+# Hello negaownirsv2!!
+
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
@@ -32,9 +34,8 @@ async def fetch_tiktok_data(url: str):
             headers=headers
         )
 
-        print("=== HTTPX DEBUG ===")
-        print("Status Code:", response.status_code)
-        print("Response Snippet:\n", response.text[:1000])  # Show first 1000 chars for debugging
+        if response.status_code != 200:
+            print(f"Warning: HTTP status {response.status_code} for URL {url}")
 
         soup = BeautifulSoup(response.text, "html.parser")
 
@@ -73,13 +74,11 @@ async def shoti_random():
             raise HTTPException(status_code=404, detail="No valid URLs found in JSON file.")
 
         random_url = random.choice(urls)
-        print(f"Selected TikTok URL: {random_url}")
 
         data = await fetch_tiktok_data(random_url)
 
-        # Return pretty-printed JSON
         return Response(
-            content=json.dumps(data, indent=4),
+            content=json.dumps(data, indent=4, ensure_ascii=False),
             media_type="application/json"
         )
 
