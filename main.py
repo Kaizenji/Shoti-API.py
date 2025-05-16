@@ -1,63 +1,69 @@
-from fastapi import FastAPI, Query, Request
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
-import requests
+import httpx
 from bs4 import BeautifulSoup
-from requests_toolbelt.multipart.encoder import MultipartEncoder
+import random
+import json
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
+async def fetch_tiktok_data(url: str):
+    data = {
+        "id": url,
+        "locale": "en",
+        "tt": ""
+    }
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Mobile Safari/537.36",
+        "origin": "https://ssstik.io",
+        "referer": "https://ssstik.io/",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://ssstik.io/abc?url=dl",
+            data=data,
+            headers=headers
+        )
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        author_img = soup.select_one("img.result_author")
+        author = author_img["alt"] if author_img else None
+
+        title_tag = soup.select_one("#avatarAndTextUsual p.maintext")
+        title = title_tag.text.strip() if title_tag else None
+
+        download_link = soup.select_one("a.download_link.without_watermark")
+        video_url = download_link["href"] if download_link else None
+
+        return {
+            "author": author,
+            "title": title,
+            "video_url": video_url
+        }
+
 @app.get("/", response_class=HTMLResponse)
-def read_index(request: Request):
+async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/tiktokdl")
-def download_tiktok(url: str = Query(...)):
-    base_url = "https://ttdownloader.co/"
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-    headers = {"User-Agent": user_agent}
+@app.get("/shoti")
+async def shoti_random():
+    try:
+        with open("shoti_videos.json", "r") as file:
+            urls = json.load(file)
 
-    response = requests.get(base_url, headers=headers)
-    response.raise_for_status()
+        if not urls:
+            raise HTTPException(status_code=404, detail="No URLs found in JSON file")
 
-    soup = BeautifulSoup(response.text, "html.parser")
-    token_input = soup.find("input", {"name": "_token"})
-    token = token_input['value'] if token_input else ""
+        random_url = random.choice(urls)
+        data = await fetch_tiktok_data(random_url)
+        return JSONResponse(content=data, indent=4)
 
-    cookies = response.cookies.get_dict()
-
-    m = MultipartEncoder(
-        fields={
-            "_token": token,
-            "url": url
-        }
-    )
-
-    post_headers = {
-        "User-Agent": user_agent,
-        "Referer": base_url,
-        "Content-Type": m.content_type
-    }
-
-    post_response = requests.post(f"{base_url}fetch", headers=post_headers, data=m, cookies=cookies)
-    post_response.raise_for_status()
-    data = post_response.json()
-
-    downloads = data.get("downloadUrls", [])
-    video_url = ""
-    for video in downloads:
-        if video.get("isHD"):
-            video_url = video.get("url")
-            break
-    if not video_url and downloads:
-        video_url = downloads[0].get("url")
-
-    result = {
-        "title": data.get("caption"),
-        "username": data.get("author", {}).get("username"),
-        "video_url": video_url,
-        "mp3url": data.get("mp3URL")
-    }
-
-    return JSONResponse(content=result, indent=4)
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="shoti_videos.json file not found")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to fetch video data")
