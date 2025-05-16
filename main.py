@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 import httpx
 from bs4 import BeautifulSoup
@@ -34,7 +34,7 @@ async def fetch_tiktok_data(url: str):
 
         print("=== HTTPX DEBUG ===")
         print("Status Code:", response.status_code)
-        print("Response Snippet:\n", response.text[:1000])  # Short preview for safety
+        print("Response Snippet:\n", response.text[:1000])  # Show first 1000 chars for debugging
 
         soup = BeautifulSoup(response.text, "html.parser")
 
@@ -76,7 +76,12 @@ async def shoti_random():
         print(f"Selected TikTok URL: {random_url}")
 
         data = await fetch_tiktok_data(random_url)
-        return JSONResponse(content=data, indent=4)
+
+        # Return pretty-printed JSON
+        return Response(
+            content=json.dumps(data, indent=4),
+            media_type="application/json"
+        )
 
     except FileNotFoundError as fnf_error:
         traceback.print_exc()
