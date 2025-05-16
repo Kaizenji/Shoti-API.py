@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shoti API Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes bounce-in {
+      0% {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .animate-fade-in {
+      animation: fade-in 0.8s ease-out forwards;
+    }
+
+    .animate-bounce-in {
+      animation: bounce-in 0.6s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-300 font-[Poppins]">
+  
+  <div class="container mx-auto px-6 py-12">
+    <header class="text-center mb-16">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-100 animate-bounce-in">
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400">
+          Shoti API
+        </span>
+      </h1>
+      <p class="mt-4 text-lg md:text-xl text-gray-400 animate-fade-in">
+        Retrieve random Shawty Videos with metadata.
+      </p>
+    </header>
+
+    <section class="bg-gray-800 border-l-8 border-blue-500 p-8 md:p-10 rounded-md shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <h2 class="text-2xl md:text-3xl font-semibold text-blue-400 mb-4">GET /shoti</h2>
+      <p class="text-gray-300 leading-relaxed">
+        Returns a JSON response containing:
+      </p>
+      <ul class="mt-6 space-y-4 list-disc list-inside text-gray-300">
+        <li>
+          <code class="bg-gray-700 px-2 py-1 rounded text-sm">author</code>: the uploader's name
+        </li>
+        <li>
+          <code class="bg-gray-700 px-2 py-1 rounded text-sm">title</code>: the video title or caption
+        </li>
+        <li>
+          <code class="bg-gray-700 px-2 py-1 rounded text-sm">video_url</code>: direct download link without watermark
+        </li>
+      </ul>
+      <div class="mt-8">
+        <p class="text-sm md:text-base font-semibold text-gray-200">Example Request:</p>
+        <pre class="bg-gray-700 text-sm md:text-base p-4 rounded mt-2 overflow-x-auto">
+<code>GET https://yourdomain.com/shoti</code>
+        </pre>
+      </div>
+    </section>
+
+    <section class="mt-16 bg-gray-800 p-8 rounded-md shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <h3 class="text-xl font-semibold text-blue-400">Key Features</h3>
+      <ul class="mt-4 space-y-3">
+        <li class="flex items-center space-x-3">
+          <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+          <span>Direct download links with no watermark.</span>
+        </li>
+        <li class="flex items-center space-x-3">
+          <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+          <span>Retrieve uploader information and captions.</span>
+        </li>
+        <li class="flex items-center space-x-3">
+          <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+          <span>Lightweight and fast API response.</span>
+        </li>
+          <li class="flex items-center space-x-3">
+    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+    <span>Made using Python FastAPI</span>
+  </li>
+      </ul>
+    </section>
+
+    <button
+      id="back-to-top"
+      class="fixed bottom-6 right-4 bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-600 focus:outline-none hidden"
+    >
+      ⬆
+    </button>
+
+    <footer class="mt-20 text-center">
+      <p class="text-sm md:text-base text-gray-500">
+        Made with ❤️ <span class="text-blue-500 font-semibold">Kaizenji</span>.
+      </p>
+      <p class="text-xs md:text-sm text-gray-600 mt-2">
+        © 2025 Shoti API. All rights reserved.
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    const backToTopButton = document.getElementById('back-to-top');
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) {
+        backToTopButton.classList.remove('hidden');
+        backToTopButton.classList.add('block');
+      } else {
+        backToTopButton.classList.add('hidden');
+        backToTopButton.classList.remove('block');
+      }
+    });
+
+    backToTopButton.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    });
+  </script>
+</body>
+</html>
